@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Io
 
 Scope {
     id: root
@@ -12,6 +13,8 @@ Scope {
     property string panelText: ""
     property string settingsText: ""
     property double timestamp: 0
+    property bool showSeconds: false
+    readonly property string homeDir: Quickshell.env("HOME") || ""
 
     function refreshDisplay() {
         if (!root.initialized) return;
@@ -19,8 +22,14 @@ Scope {
         // retains local wall-clock fields that Qt can reinterpret in a new zone.
         // Reassigning an equal date alone also cannot notify text bindings.
         const current = new Date(root.timestamp);
-        root.panelText = Qt.formatDateTime(current, "ddd dd MMM - HH:mm");
+        root.panelText = Qt.formatDateTime(current,
+            root.showSeconds ? "ddd dd MMM - HH:mm:ss" : "ddd dd MMM - HH:mm");
         root.settingsText = Qt.formatDateTime(current, "dddd, dd MMMM yyyy - HH:mm t");
+    }
+
+    function applySecondsSetting() {
+        root.showSeconds = secondsFile.text().trim() === "on";
+        root.refreshDisplay();
     }
 
     function refreshTimezone() {
@@ -38,12 +47,23 @@ Scope {
         root.timestamp = source.date.getTime();
         root.initialized = true;
         root.refreshTimezone();
-        root.refreshDisplay();
+        root.applySecondsSetting();
+    }
+
+    // Sekunden-Schalter: "on" zeigt Sekunden, alles andere nicht.
+    FileView {
+        id: secondsFile
+        path: root.homeDir + "/.config/dwm-titus/clock-seconds.conf"
+        watchChanges: true
+        printErrors: false
+        onLoaded: root.applySecondsSetting()
+        onLoadFailed: root.applySecondsSetting()
+        onFileChanged: reload()
     }
 
     SystemClock {
         id: source
-        precision: SystemClock.Minutes
+        precision: SystemClock.Seconds
         onDateChanged: {
             if (root.initialized) {
                 root.timestamp = source.date.getTime();
