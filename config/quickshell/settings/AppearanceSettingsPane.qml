@@ -1,6 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls as Controls
+import Quickshell
+import Quickshell.Io
 import qs.core
 
 pragma ComponentBehavior: Bound
@@ -1251,6 +1253,52 @@ Flickable {
                         accessibleName: panelWidgetRow.modelData.label
                         accessibleDescription: "Show this widget in the managed panel"
                         onToggled: root.panelSettingsModel.toggleWidget(panelWidgetRow.modelData.id)
+                    }
+                }
+            }
+        }
+
+        Rectangle {
+            id: clockSecondsRow
+            property bool on: clockSecondsFile.text().trim() === "on"
+
+            Layout.fillWidth: true
+            Layout.preferredHeight: Theme.scaledSize(48)
+            color: Theme.controlNormalFill
+            border.color: Theme.controlNormalBorder
+            border.width: Theme.controlBorderWidth
+            radius: Theme.controlRadius
+
+            FileView {
+                id: clockSecondsFile
+                path: (Quickshell.env("HOME") || "") + "/.config/dwm-titus/clock-seconds.conf"
+                watchChanges: true
+                printErrors: false
+                onFileChanged: reload()
+            }
+
+            Process { id: clockSecondsWrite }
+
+            RowLayout {
+                anchors.fill: parent
+                anchors.leftMargin: Theme.spacingLg
+                anchors.rightMargin: Theme.spacingLg
+
+                UiText {
+                    Layout.fillWidth: true
+                    text: "Clock seconds"
+                    color: Theme.menuText
+                }
+
+                PanelToggleSwitch {
+                    checked: clockSecondsRow.on
+                    accessibleName: "Clock seconds"
+                    accessibleDescription: "Show seconds on the panel clock"
+                    onToggled: {
+                        clockSecondsWrite.command = ["sh", "-c",
+                            "mkdir -p \"$HOME/.config/dwm-titus\" && echo " + (clockSecondsRow.on ? "off" : "on")
+                            + " > \"$HOME/.config/dwm-titus/clock-seconds.conf\""];
+                        clockSecondsWrite.running = true;
                     }
                 }
             }
