@@ -165,6 +165,8 @@ PanelWindow {
                 }
             }
 
+            KbdLayout {}
+
             ShellButton {
                 id: updateCenterIndicator
                 objectName: "updateCenterIndicator"
