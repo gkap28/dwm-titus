@@ -12,23 +12,22 @@ Erwartet: "Hi gkap28! You've successfully authenticated"
 Bei "Permission denied": zuerst `chmod 600 ~/.ssh/id_ed25519`, dann den Befehl wiederholen.
 Fehlt die Datei ~/.ssh/id_ed25519 ganz, musst du einen neuen Schlüssel anlegen und bei GitHub hinterlegen (https://github.com/settings/keys).
 
-## 3. Fork klonen
-Befehl:
-    mkdir -p ~/Projects && git clone git@github.com:gkap28/dwm-titus.git ~/Projects/dwm-titus
-Erwartet: Der Ordner ~/Projects/dwm-titus existiert.
+## 3. Fork klonen und installieren
+Befehle, nacheinander:
+    git clone https://github.com/gkap28/dwm-titus.git ~/Projects/dwm-titus
+    cd ~/Projects/dwm-titus
+    git status
+    sudo make install
+Erwartet bei `git status`: "nothing to commit, working tree clean" und "On branch main".
+Der Installer schreibt die Updater-Adresse (gkap28/dwm-titus) automatisch.
 
 ## 4. Upstream verbinden (für spätere Updates von ChrisTitusTech)
 Befehl:
     git -C ~/Projects/dwm-titus remote add upstream https://github.com/ChrisTitusTech/dwm-titus.git
 Erwartet: keine Ausgabe.
 
-## 5. Updater auf den Fork stellen
-Zwei Befehle, jeder einzeln:
-    sudo sed -i 's|SOURCE = "https://github.com/ChrisTitusTech/dwm-titus.git"|SOURCE = "https://github.com/gkap28/dwm-titus.git"|' /usr/local/bin/dwm-desktop-update
-    sudo sed -i 's|"source": "https://github.com/ChrisTitusTech/dwm-titus.git"|"source": "https://github.com/gkap28/dwm-titus.git"|' /usr/local/share/dwm-titus/desktop-install.json
-Prüfen:
-    grep -n "^SOURCE" /usr/local/bin/dwm-desktop-update
-Erwartet: Zeile zeigt gkap28/dwm-titus.
+## 5. (entfällt)
+Die Updater-Adresse wird durch `make install` gesetzt. Nichts von Hand ändern.
 
 ## 6. Prüfen, ob ein Update da ist
 Befehl:
